@@ -4,11 +4,16 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <style>
+body, html {
+height: auto;
+overflow:hidden;
+}
 .right {
    -webkit-transform: scaleX(-1);
   transform: scaleX(-1);
@@ -27,6 +32,16 @@ $(document).ready(function(){
 let timeSleep = false;
 const champion = document.querySelector("#champ");
 
+
+const windowWidth  = window.innerWidth || document.documentElement.clientWidth || 
+document.body.clientWidth;
+
+
+
+const windowHeight = window.innerHeight|| document.documentElement.clientHeight|| 
+document.body.clientHeight;
+
+
 let champTop = 150;
 let champLeft = 150;
 let moveSleep = 300;
@@ -36,6 +51,8 @@ const moveY = "https://www.fightersgeneration.com/nf7/char/sol-badguy-guiltygear
 
 const stop = "https://gifimage.net/wp-content/uploads/2018/05/sol-badguy-gif.gif";
 
+const jumpWithDirection = "https://i.pinimg.com/originals/e0/4c/83/e04c83467a561e8da690273ddba156c5.gif";
+
 const selectPosition = (condition)=>{
   if (condition == "moveX"){
     $("#champ").attr("src",moveX);
@@ -43,7 +60,12 @@ const selectPosition = (condition)=>{
     $("#champ").attr("src",moveY);
   } else if (condition == "stop") {
     $("#champ").attr("src",stop);
+  } else if (condition == "jumpD") {
+    $("#champ").attr("src",jumpWithDirection);
+  } else {
+    return false;
   }
+  return true;
 };
 
 
@@ -63,13 +85,18 @@ const sleep = async (miliseconds)=> {
 
 async function jumb(){
 
+
+
  if (champTop > 80 && timeSleep == false) {
-  await sleep(52);
+  selectPosition("jumpD");
+  await sleep(450);
   champTop -= 80;
   await $("#champ_container").animate({top: champTop});
   await setTimeout(()=>{champTop += 80;
-  $("#champ_container").animate({top: champTop});}, 50);
+  $("#champ_container").animate({top: champTop});}, 450);
   }
+
+
   /*else if (champTop < 80 && timeSleep == false) {
     sleep(52);
     let minius = 80 - champTop;
@@ -82,22 +109,31 @@ async function jumb(){
   } */
 }
 
-jumb();
 
 
 
-
-const moveChamp = async (direction, champ)=> {
+  addEvent(document, "keydown", function (e) {
+    e = e || window.event;
       
+      if (e.code == "Space"){
+          jumb();
+      }
+      
+   });
+      
+
+async function moveChamp (direction, champ) {
+
   if (direction == "right" && timeSleep == false){
     // move right
     selectPosition("moveX");
     sleep(moveSleep);
     
-    if (champLeft > 690) {
+    let currentShade = windowWidth - $("#champ_container").width() - 50;
+    if (champLeft > currentShade-50) {
       
       $("#champ").removeClass("champ_left");
-      champLeft = 700;
+      champLeft = currentShade;
       $("#champ_container").animate({left: `${champLeft}px`});      
     } else {
       await $("#champ").removeClass("champ_left");
@@ -141,8 +177,9 @@ const moveChamp = async (direction, champ)=> {
     // move down
     selectPosition("moveY");
     sleep(moveSleep);
-    if (champTop > 580) {
-      champTop = 590;
+    let currentShadeHeight = windowHeight - $("#champ_container").height() - 100;
+    if (champTop > (currentShadeHeight-100)) {
+      champTop = currentShadeHeight;
       await $("#champ_container").animate({top: `${champTop}px`});
       return true;
     } else {
@@ -167,7 +204,7 @@ const moveChamp = async (direction, champ)=> {
 
 addEvent(document, "keydown", function (e) {
     e = e || window.event;
-    //console.log(e);
+    console.log(e);
     // use e.keyCode
 
     if (e.code === "ArrowRight"){
@@ -204,6 +241,7 @@ function addEvent(element, eventName, callback) {
 <body>
 
 
+<div class="container" style="width:700px;height:650px;">
 
 <div id="champ_container"  class="champ_cont" style="height:100px;width:150px;position:absolute;top:150px;">
   <div class="progress" style="width:150px;position:absolute;top:-20px;left:30px;">
@@ -214,7 +252,7 @@ function addEvent(element, eventName, callback) {
   <img width="200" height="200" id="champ" class="champ" src="https://gifimage.net/wp-content/uploads/2018/05/sol-badguy-gif.gif" >
 <div>  
 
-
+</div>
 
 
 
