@@ -18,11 +18,36 @@
 <script>
 
 let timeSleep = false;
+const champion = document.querySelector("#champ");
+
+let champTop = 150;
+let champLeft = 150;
+let moveSleep = 300;
+const moveX = "https://i.pinimg.com/originals/bd/6c/33/bd6c332688c22883c9ac21e55e4805bc.gif";
+
+const moveY = "https://www.fightersgeneration.com/nf7/char/sol-badguy-guiltygear-xrd-walk.gif";
+
+const stop = "https://gifimage.net/wp-content/uploads/2018/05/sol-badguy-gif.gif";
+
+const selectPosition = (condition)=>{
+  if (condition == "moveX"){
+    $("#champ").attr("src",moveX);
+  } else if (condition == "moveY") {
+    $("#champ").attr("src",moveY);
+  } else if (condition == "stop") {
+    $("#champ").attr("src",stop);
+  }
+};
+
 
 const sleep = (miliseconds)=> {
   timeSleep = true;
-  setTimeout(()=> {timeSleep = false;}, miliseconds);  
-}
+  setTimeout(()=> {timeSleep = false;
+  selectPosition("stop");
+  return false;
+  }, miliseconds);  
+};
+
 $(document).ready(function(){
   $("button").click(function(){
     
@@ -82,16 +107,16 @@ $(document).ready(function(){
   });
 });
 
-const champion = document.querySelector("#champ");
 
-let champTop = 150;
-let champLeft = 150;
-let moveSleep = 300;
+
+
+
 
 const moveChamp = async (direction, champ)=> {
       
   if (direction == "right" && timeSleep == false){
     // move right
+    selectPosition("moveX");
     sleep(moveSleep);
     
     if (champLeft > 690) {
@@ -109,6 +134,7 @@ const moveChamp = async (direction, champ)=> {
   } else if (direction == "left" && timeSleep == false) {
     
     // move left
+    selectPosition("moveX");
     sleep(moveSleep);
     if (champLeft > 50) {
       champLeft = champLeft - 50;
@@ -124,9 +150,10 @@ const moveChamp = async (direction, champ)=> {
     
   } else if (direction == "up" && timeSleep == false) {
     // move up
+    selectPosition("moveY");
     sleep(moveSleep);
-    if (champTop > 10) {
-      champTop = champTop - 10;
+    if (champTop > 50) {
+      champTop = champTop - 50;
       await $("#champ").animate({top: `${champTop}px`});
       return true;
     } else {
@@ -137,17 +164,19 @@ const moveChamp = async (direction, champ)=> {
   
   } else if (direction == "down" && timeSleep == false) {
     // move down
+    selectPosition("moveY");
     sleep(moveSleep);
     if (champTop > 580) {
       champTop = 590;
       await $("#champ").animate({top: `${champTop}px`});
       return true;
     } else {
-      champTop = champTop + 10;
+      champTop = champTop + 50;
       await $("#champ").animate({top: champTop});
       return true;
     }  
   } else {
+    selectPosition("stop");
     console.log(direction, "falseeee", $("#champ"));
     return false;
     
@@ -205,7 +234,7 @@ function addEvent(element, eventName, callback) {
 
 
 
-<img id="champ" class="champ" src="https://64.media.tumblr.com/94389cd52e11c831e1badfb03fdd74b9/tumblr_n95l8rW0Ke1rn3500o1_r1_540.gifv" style="height:100px;width:100px;position:absolute;">
+<img id="champ" class="champ" src="https://gifimage.net/wp-content/uploads/2018/05/sol-badguy-gif.gif" style="height:100px;width:100px;position:absolute;">
 
 
 <!-- 
