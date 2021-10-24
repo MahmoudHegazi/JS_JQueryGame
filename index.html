@@ -105,6 +105,17 @@ const sleep = async (miliseconds)=> {
 };
 
 
+function enableChatChamp(){
+  const chatContainer = document.querySelector("#chat_container");
+  chatContainer.style.background = "#66c28fc7";
+}
+
+
+function disableChatChamp(){
+  const chatContainer = document.querySelector("#chat_container");
+  chatContainer.style.background = "#d3d3d345";
+}
+
 
 /* */
 
@@ -152,8 +163,65 @@ return mon;
 
 }
 
+const necroCont9 = document.querySelector("#necro_cont");
 
 
+/* Base Home Point script objects */
+ const necroHeight = $("#necro_char").height();
+ const necroWidth = $("#necro_char").height();
+const necro = {
+  background: "https://images.pexels.com/photos/998641/pexels-photo-998641.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+  characterId: "necro_char",
+  getPositions: function() {
+    const necroCont = document.querySelector("#necro_cont");
+    if (necroCont){
+      const necroContPositions = getObjPos(necroCont);
+      return necroContPositions;
+    } else {
+      return null;
+    } 
+    
+  },
+  
+  isTuched: function(necroObj, champObj){
+    const necroPositions = necroObj;
+    const champPositions = champObj;
+    if (!necroObj || !champObj){return false;}
+   // alert((necroPositions.right - necroWidth) + ":chmp" + champObj.right);
+    let isChampInArea = false;
+    if (champObj.right >= (necroPositions.right - (necroWidth - 100)) && champObj.right < necroPositions.right ) {
+      //alert("champ in area of necro right");
+      isChampInArea = true;
+    
+    } else if (necroPositions.left == champObj.right) {
+       //alert("champ in area of necro left");
+       isChampInArea = true;
+    
+    } else if (necroPositions.top == champObj.top) {
+      // alert("champ in area of necro top");
+       isChampInArea = true;
+    } else if (necroPositions.bottom == champObj.bottom) {
+      // alert("champ in area of necro bottom");
+       isChampInArea = true;
+    
+    } else {
+      isChampInArea = false;
+    }
+    return isChampInArea;
+    
+  },
+  chat: (inArea)=> {
+    if (inArea) {
+       
+       return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+
+/* Base Home end */
 
 
  
@@ -280,19 +348,44 @@ async function moveChamp (direction, champ) {
 };
 
 // moving 
+//alert(necro.background);
 
+
+function checkChampVsObjects(object){
+      if (object == "necro"){
+        //const ableToChatWithNecro = necro.chat(isInNecroArea);
+        
+        let activeBg = "url('" +necro.background  + "')";
+        if (necro.isTuched(getObjPos(necroCont9), getObjPos(champion))){
+          enableChatChamp();
+          //necroCont9.style.backgroundImage = necro.background;
+          necroCont9.style.background = activeBg;
+          return true;
+        } else {
+          disableChatChamp();
+          necroCont9.style.background = "";
+          return false;
+        }
+        
+        
+      }
+}
 addEvent(document, "keydown", function (e) {
+    checkChampVsObjects("necro");
     e = e || window.event;
     console.log(e);
     // use e.keyCode
 
     if (e.code === "ArrowRight"){
       moveChamp("right", champion);
+
       console.log("right");
     } else if (e.code === "ArrowLeft") {
+  
       moveChamp("left", champion);
       console.log("left");
     } else if (e.code === "ArrowUp"){
+
       moveChamp("up", champion);
       console.log("up");
     } else if (e.code === "ArrowDown"){
@@ -346,7 +439,16 @@ function addEvent(element, eventName, callback) {
   
 
 
-$('[data-toggle="popover"]').popover();   
+ 
+$('#chatButton').click(function(){
+  $('#chat_container').toggle();   
+})
+
+
+
+const necroCont = document.querySelector("#necro_cont");
+//alert(necro.isTuched());
+
 });
 </script> 
 </head>
@@ -357,14 +459,14 @@ $('[data-toggle="popover"]').popover();
 
 
 
-<div class="container" style="height:400px;width:200px;position:fixed;bottom:-30px;right:0;z-index:1;">
+<div class="container" style="height:300px;width:200px;position:fixed;bottom:-30px;right:0;z-index:1;">
 
 <div class="container">
   <a href="#" style="z-index:12;cursor:pointer;position:relative;top:0px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="top" data-trigger="focus" title="What Is House!" data-content="You can use the house as a save point in the game and also you can save your items into it.">The House</a>
 </div>
 
 
-<img style="height:400px;width:200px;position:fixed;bottom:-50px;right:0;z-index:1;"src="https://www.pinuphouses.com/wp-content/uploads/two-bedroom-small-house-plans.png">
+<img style="height:300px;width:200px;position:fixed;bottom:-50px;right:0;z-index:1;"src="https://www.pinuphouses.com/wp-content/uploads/two-bedroom-small-house-plans.png">
   
 </div>
 <div id="game_container" class="container" style="width:auto;auto;">
@@ -375,27 +477,27 @@ $('[data-toggle="popover"]').popover();
 
 
 
-<div style="height:300px;width:200px;position:fixed;top:10px;right:50px;z-index:1;text-align:center;">
+<div id="necro_cont" style="height:300px !important;width:250px;position:fixed;top:10px;right:50px;z-index:1;text-align:center;">
 
-<div class="container">
+<div class="container" >
   <a href="#" style="z-index:12;cursor:pointer;position:relative;top:-10px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="left" data-trigger="focus" title="Who is the Necromancer!" data-content="Who is the mysterious necromancer? Oh.. I'm afraid to tell you that we don't know much about him. He doesn't talk much. We don't trust him, but the King always needs him here. Try to avoid him. I don't. trust him and I saw him talk to something invisible before I think it a Ghost..">Necromancer</a>
 </div>
 
 
-<img src="https://thumbs.gfycat.com/ArcticGratefulCrustacean-size_restricted.gif" width="250" height="200">
+<img id="necro_char" style="position: fixed;top: 40px;right: 25px;" src="https://thumbs.gfycat.com/ArcticGratefulCrustacean-size_restricted.gif" width="250" height="200">
   
 </div>
 
 
 
-<div style="height:400px;width:200px;position:fixed;bottom:-40px;left:0;z-index:1;text-align:center;">
+<div style="height:300px;width:200px;position:fixed;bottom:-40px;left:0;z-index:1;text-align:center;">
 
 <div class="container">
   <a href="#" style="z-index:12;cursor:pointer;position:relative;top:-10px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="top" data-trigger="focus" title="What Is Castle!" data-content="The Castle Is the House Of the King and you as one of the bravest garurds for the king you can enter the castle to talk to your king and get new tasks direct, and win rewards and read the Map.">The Castle</a>
 </div>
 
 
-<img style="height:300px;width:200px;"src="https://clipart.world/wp-content/uploads/2020/08/animated-ancient-castle-transparent.png">
+<img style="height:200px;width:200px;"src="https://clipart.world/wp-content/uploads/2020/08/animated-ancient-castle-transparent.png">
   
 </div>
 
@@ -404,7 +506,7 @@ $('[data-toggle="popover"]').popover();
   <a href="#" style="z-index:12;cursor:pointer;position:relative;top:0px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="right" data-trigger="focus" title="Who Is the Blacksmith!" data-content="Oh, it's long Story ..Black Smith is old warrior he created great weabons for great warriors like you, try to talk to him to buy and sell weaponse and items">The Blacksmith</a>
 </div>
 
-<img width="300" height="250" src="https://forum.reallusion.com/uploads/images/746eaaf4-09cc-4878-a367-1c0b.gif">
+<img width="250" height="250" src="https://forum.reallusion.com/uploads/images/746eaaf4-09cc-4878-a367-1c0b.gif">
   
 </div>
 
@@ -416,7 +518,7 @@ $('[data-toggle="popover"]').popover();
 
 <!-- champ start -->
 
-<div id="champ_container"  class="champ_cont" style="height:100px;width:150px;position:absolute;top:0px;left:0;z-index:10;">
+<div id="champ_container"  class="champ_cont" style="height:100px;width:150px;position:fixed;top:0px;left:0;z-index:10;">
   <div class="progress" style="width:150px;position:absolute;top:-20px;left:30px;">
     <div class="progress-bar bg-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:100%">
       100% (Health)
@@ -436,9 +538,11 @@ $('[data-toggle="popover"]').popover();
   
 <!-- champ end -->
 
+<div id="chat_container" class="chat" style="height:150px;width:150px;position:fixed;bottom:0px;left:0;z-index:10;background:lightgray;width:100%;background:#d3d3d345;padding:15px;font-weight:bold;font-family:sans-serif;">Hello world </div>
 
 </div>
 
+<button id="chatButton" data-chat="chat_container" style="display:block;position:fixed;bottom:-5px;left:0;z-index:10;background:lightgray;width:100%;font-size:14px;">Hide Chat</button>
 
 
 
