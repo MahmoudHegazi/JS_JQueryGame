@@ -4,6 +4,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -23,6 +25,11 @@ overflow:hidden;
    -webkit-transform: scaleX(-1);
   transform: scaleX(-1);
 }
+
+
+.monster_continer {
+ height:100px;width:150px;position:absolute;top:150px;left:150px;
+}
 </style>
 <script>
 
@@ -41,10 +48,13 @@ document.body.clientWidth;
 const windowHeight = window.innerHeight|| document.documentElement.clientHeight|| 
 document.body.clientHeight;
 
-
+let totalMonsters = 0;
+const currentMonsters = [];
 let champTop = 150;
 let champLeft = 150;
 let moveSleep = 300;
+let champWidth =  $("#champ").width();
+let champHeight =  $("#champ").height();
 const moveX = "https://i.pinimg.com/originals/bd/6c/33/bd6c332688c22883c9ac21e55e4805bc.gif";
 
 const moveY = "https://www.fightersgeneration.com/nf7/char/sol-badguy-guiltygear-xrd-walk.gif";
@@ -52,6 +62,20 @@ const moveY = "https://www.fightersgeneration.com/nf7/char/sol-badguy-guiltygear
 const stop = "https://gifimage.net/wp-content/uploads/2018/05/sol-badguy-gif.gif";
 
 const jumpWithDirection = "https://i.pinimg.com/originals/e0/4c/83/e04c83467a561e8da690273ddba156c5.gif";
+
+
+function  getObjPos(obj){
+   let champData =  {
+      right: obj.getBoundingClientRect().right,
+      left: obj.getBoundingClientRect().left,
+      top: obj.getBoundingClientRect().top,
+      bottom: obj.getBoundingClientRect().bottom
+    }
+   return champData;
+}
+
+
+const champPoistCord = getObjPos(champion);
 
 const selectPosition = (condition)=>{
   if (condition == "moveX"){
@@ -79,6 +103,58 @@ const sleep = async (miliseconds)=> {
   }, miliseconds);  
   
 };
+
+
+
+/* */
+
+function validRight(champRight, champWidth, monWidth){
+  let right = champRight;
+  let width = champWidth;    //champWidth
+  let monsterWidth = monWidth;
+  let gameWidth = 1000 - monsterWidth;
+  let mon = Math.floor(Math.random() * gameWidth);  
+  let rightCheck = mon > 0 && mon < (right - width) || (mon >  right + monsterWidth);
+  
+  if (rightCheck){
+    return mon;
+  } else {
+    while (rightCheck == false) {
+  mon = Math.floor(Math.random() * gameWidth);
+  rightCheck = mon > 0 && mon < right - width || (mon >  right + monsterWidth);
+  if (rightCheck == true){
+    break;
+  }
+
+}
+return mon;
+}
+}
+
+function validTop(champBottom, champHeight, monHeight){
+let bottom = champBottom;
+let height = champHeight;    //champWidth
+let monsterHeight = monHeight;
+let gameHeight = 800 - monHeight;
+
+
+let mon = Math.floor(Math.random() * gameHeight);
+let topCheck = mon > (300 + 150) ||  mon < (300 - 150);
+while ( topCheck  == false ) {
+  mon = Math.floor(Math.random() * gameHeight);
+  //topCheck = mon < (bottom + monsterHeight) ||  mon > (bottom + monsterHeight);
+  topCheck = mon > (300 + 150) ||  mon < (300 - 150);
+
+}
+if (mon >= 300 && mon <= 400) {
+}
+return mon;
+
+}
+
+
+
+
 
  
 
@@ -125,19 +201,22 @@ async function jumb(){
 async function moveChamp (direction, champ) {
 
   if (direction == "right" && timeSleep == false){
+  
+
     // move right
     selectPosition("moveX");
     sleep(moveSleep);
     
     let currentShade = windowWidth - $("#champ_container").width() - 50;
-    if (champLeft > currentShade-50) {
+    if (champLeft > (currentShade-100)) {
       
       $("#champ").removeClass("champ_left");
       champLeft = currentShade;
-      $("#champ_container").animate({left: `${champLeft}px`});      
+      $("#champ_container").animate({left: `${champLeft}px`});   
     } else {
+   
       await $("#champ").removeClass("champ_left");
-      champLeft = champLeft + 50;
+      champLeft = champLeft + 100;
       await $("#champ_container").animate({left: `${champLeft}px`});
     }
     
@@ -147,8 +226,8 @@ async function moveChamp (direction, champ) {
     // move left
     selectPosition("moveX");
     sleep(moveSleep);
-    if (champLeft > 50) {
-      champLeft = champLeft - 50;
+    if (champLeft > 100) {
+      champLeft = champLeft - 100;
       await $("#champ_container").animate({left: `${champLeft}px`});
       await $("#champ").addClass("champ_left");
       return true;
@@ -163,8 +242,8 @@ async function moveChamp (direction, champ) {
     // move up
     selectPosition("moveY");
     sleep(moveSleep);
-    if (champTop > 50) {
-      champTop = champTop - 50;
+    if (champTop > 100) {
+      champTop = champTop - 100;
       await $("#champ_container").animate({top: `${champTop}px`});
       return true;
     } else {
@@ -183,7 +262,7 @@ async function moveChamp (direction, champ) {
       await $("#champ_container").animate({top: `${champTop}px`});
       return true;
     } else {
-      champTop = champTop + 50;
+      champTop = champTop + 100;
       await $("#champ_container").animate({top: champTop});
       return true;
     }  
@@ -208,7 +287,6 @@ addEvent(document, "keydown", function (e) {
     // use e.keyCode
 
     if (e.code === "ArrowRight"){
-    
       moveChamp("right", champion);
       console.log("right");
     } else if (e.code === "ArrowLeft") {
@@ -235,22 +313,129 @@ function addEvent(element, eventName, callback) {
     }
 }
 
+
+  /* Monsters */
+  
+  function addMonster(champPosition) {
+     totalMonsters += 1;
+
+     let leftCord = Math.floor(Math.random() * champPosition.left);
+     let rightCord = Math.floor(Math.random() * champPosition.right);
+     
+     let topCord = Math.floor(Math.random() * champPosition.top);
+     let bottomCord = Math.floor(Math.random() * champPosition.bottom);
+     
+     const gamgeContainer = document.querySelector("#game_container");
+     const newMonster = document.createElement("div");
+     newMonster.classList.add("monster_continer");
+     newMonster.id = "monster_container_" + totalMonsters;
+     let monsterId = "monster_" + totalMonsters;
+     currentMonsters.push({monsterContainerId: "monster_container_" + totalMonsters, monsterId: monsterId});
+     gamgeContainer.innerHTML +=
+     
+       `<div id="monster_1"  class="monster_continer">           
+           <div class="progress bg-danger"
+           style="width:150px;position:absolute;top:-20px;left:30px;">
+           <div class="progress-bar bg-danger progress-bar-striped"
+           role="progressbar" aria-valuenow="40" aria-valuemin="0"
+           aria-valuemax="100" style="width:100%">100% (Health)</div></div>
+           <img width="200" height="200" id="${monsterId}" class="monster"
+           src="http://www.fightersgeneration.com/bk.gif">
+      <div>`
+  }
+  
+
+
+$('[data-toggle="popover"]').popover();   
 });
 </script> 
 </head>
 <body>
 
 
-<div class="container" style="width:700px;height:650px;">
 
-<div id="champ_container"  class="champ_cont" style="height:100px;width:150px;position:absolute;top:150px;">
+
+
+
+<div class="container" style="height:400px;width:200px;position:fixed;bottom:-30px;right:0;z-index:1;">
+
+<div class="container">
+  <a href="#" style="z-index:12;cursor:pointer;position:relative;top:0px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="top" data-trigger="focus" title="What Is House!" data-content="You can use the house as a save point in the game and also you can save your items into it.">The House</a>
+</div>
+
+
+<img style="height:400px;width:200px;position:fixed;bottom:-50px;right:0;z-index:1;"src="https://www.pinuphouses.com/wp-content/uploads/two-bedroom-small-house-plans.png">
+  
+</div>
+<div id="game_container" class="container" style="width:auto;auto;">
+
+
+
+
+
+
+
+<div style="height:300px;width:200px;position:fixed;top:10px;right:50px;z-index:1;text-align:center;">
+
+<div class="container">
+  <a href="#" style="z-index:12;cursor:pointer;position:relative;top:-10px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="left" data-trigger="focus" title="Who is the Necromancer!" data-content="Who is the mysterious necromancer? Oh.. I'm afraid to tell you that we don't know much about him. He doesn't talk much. We don't trust him, but the King always needs him here. Try to avoid him. I don't. trust him and I saw him talk to something invisible before I think it a Ghost..">Necromancer</a>
+</div>
+
+
+<img src="https://thumbs.gfycat.com/ArcticGratefulCrustacean-size_restricted.gif" width="250" height="200">
+  
+</div>
+
+
+
+<div style="height:400px;width:200px;position:fixed;bottom:-40px;left:0;z-index:1;text-align:center;">
+
+<div class="container">
+  <a href="#" style="z-index:12;cursor:pointer;position:relative;top:-10px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="top" data-trigger="focus" title="What Is Castle!" data-content="The Castle Is the House Of the King and you as one of the bravest garurds for the king you can enter the castle to talk to your king and get new tasks direct, and win rewards and read the Map.">The Castle</a>
+</div>
+
+
+<img style="height:300px;width:200px;"src="https://clipart.world/wp-content/uploads/2020/08/animated-ancient-castle-transparent.png">
+  
+</div>
+
+<div style="width:300px;margin-left:auto;margin-right:auto;text-align:center;background:url('https://www.freeiconspng.com/uploads/sword-png-3.png');background-size:cover;">
+<div class="container">
+  <a href="#" style="z-index:12;cursor:pointer;position:relative;top:0px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="right" data-trigger="focus" title="Who Is the Blacksmith!" data-content="Oh, it's long Story ..Black Smith is old warrior he created great weabons for great warriors like you, try to talk to him to buy and sell weaponse and items">The Blacksmith</a>
+</div>
+
+<img width="300" height="250" src="https://forum.reallusion.com/uploads/images/746eaaf4-09cc-4878-a367-1c0b.gif">
+  
+</div>
+
+
+
+<div id="game_container" class="container" style="width:auto;auto;">
+
+
+
+<!-- champ start -->
+
+<div id="champ_container"  class="champ_cont" style="height:100px;width:150px;position:absolute;top:0px;left:0;z-index:10;">
   <div class="progress" style="width:150px;position:absolute;top:-20px;left:30px;">
-    <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:100%">
+    <div class="progress-bar bg-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:100%">
       100% (Health)
     </div>
   </div>
   <img width="200" height="200" id="champ" class="champ" src="https://gifimage.net/wp-content/uploads/2018/05/sol-badguy-gif.gif" >
 <div>  
+
+
+
+<!-- champ end -->
+
+
+
+<!-- champ start -->
+
+  
+<!-- champ end -->
+
 
 </div>
 
