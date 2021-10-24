@@ -26,10 +26,36 @@ overflow:hidden;
   transform: scaleX(-1);
 }
 
+.champ_left:before {
+  content: "champion";
+}
 
 .monster_continer {
  height:100px;width:150px;position:absolute;top:150px;left:150px;
 }
+
+.champ_chat{
+  color: #c0e011;
+}
+
+.necro_chat{
+  color: #ffc900;
+}
+p.champ_chat::before {
+  content: "Champion: ";
+}
+
+p.necro_chat::before {
+  content: "Mazard: ";
+}
+
+#chat_container{
+  height: 200px;
+  margin-bottom: 30px;
+  overflow: auto;
+}
+
+
 </style>
 <script>
 
@@ -38,6 +64,7 @@ overflow:hidden;
 $(document).ready(function(){
 let timeSleep = false;
 const champion = document.querySelector("#champ");
+
 
 
 const windowWidth  = window.innerWidth || document.documentElement.clientWidth || 
@@ -64,6 +91,7 @@ const stop = "https://gifimage.net/wp-content/uploads/2018/05/sol-badguy-gif.gif
 const jumpWithDirection = "https://i.pinimg.com/originals/e0/4c/83/e04c83467a561e8da690273ddba156c5.gif";
 
 
+let stopEvents = false;
 function  getObjPos(obj){
    let champData =  {
       right: obj.getBoundingClientRect().right,
@@ -105,17 +133,174 @@ const sleep = async (miliseconds)=> {
 };
 
 
+
+const necroCont9 = document.querySelector("#necro_cont");
+
+/* Base Home Point script objects */
+ const necroHeight = $("#necro_char").height();
+ const necroWidth = $("#necro_char").height();
+const necro = {
+  background: "https://images.pexels.com/photos/998641/pexels-photo-998641.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+  characterId: "necro_char",
+  tasks: [["nice You Will be a very strong warrior now but you have to do something first for me are you intersted yes or no ?","ok the first task is I heared about some bad people killing and stealing the gold from the king, the are not far from here but take care they are strong and have good weabopns I think the BlackSmith help them but let's focus on them I need you to get from them my gold they steal it. !Now are you brave enogh to help me yes or no?"],["I'm sure you are brave and going to get the gold from them Thanks for trusting me", "you can go now you will find them out side the town I will wait you after you get the gold I will give you reward, Bye (Always say bye to others)"]],
+  chatlvl: 0,
+  trust: false,
+  getPositions: function() {
+    const necroCont = document.querySelector("#necro_cont");
+    if (necroCont){
+      const necroContPositions = getObjPos(necroCont);
+      return necroContPositions;
+    } else {
+      return null;
+    } 
+    
+  },
+  
+  isTuched: function(necroObj, champObj){
+    const necroPositions = necroObj;
+    const champPositions = champObj;
+    if (!necroObj || !champObj){return false;}
+   // alert((necroPositions.right - necroWidth) + ":chmp" + champObj.right);
+    let isChampInArea = false;
+    if (champObj.right >= (necroPositions.right - (necroWidth - 100)) && champObj.right < necroPositions.right + 100 ) {
+      //alert("champ in area of necro right");
+      isChampInArea = true;
+    
+    } else {
+      isChampInArea = false;
+    }
+    return isChampInArea;
+    
+  },
+  chat: (inArea)=> {
+    if (inArea) {
+       
+       return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+
+
+const chatWithNecro = document.querySelector("#chat_with_necrobtn");
+const addNewMessageCont = document.querySelector("#chat_container");
+
+  
+let chatlvl = 0;
+let waitAction = false;
+function applyInpuAction(champMessage){
+
+  if (waitAction == true && champMessage.trim().toLowerCase() == "yes"){
+     necro.trust = true;
+     
+     
+     necroChatTasks(chatlvl);
+     chatlvl += 1;
+     necro.chatlvl = chatlvl;
+     return true;
+  } else {
+     necro.chatlvl = 0;
+     disableChatChamp();
+     return false;
+  }
+}
+let canChampChatWithNecro = false;
+
+function necroChatTasks(index){
+
+  if (necro.tasks.length == index){
+   waitAction = false;
+   disableChatChamp();
+ }
+ 
+ 
+ necro.tasks[index].forEach( (necroMessage)=>{
+     addChampMessage(necroMessage, "necro");
+ })
+
+      
+}
+
+
+
+function startChatWithNecro(){
+  
+  addChampMessage("hi Mr Necromancer", "champ");
+  
+  
+  let activeBg = "url('" +necro.background  + "')";
+  if (canChampChatWithNecro == false || necro.isTuched(getObjPos(necroCont9), getObjPos(champion)) == false){
+  necroCont9.style.background = "";
+  stopEvents = false;
+  return false;
+  }
+  
+  stopEvents = true; 
+  
+  necroCont9.style.background = activeBg;
+
+    addChampMessage("Offff, Do not call me Mr Necromancer I'm King of Necromancers, Hello Brave Warrio I'm Mazrd I hearead a lot about you and now I meet you fianlly Golden Castle is Very small.. ", "necro");
+
+    addChampMessage("Look I want to tell you a secreet I Know alot of secrets and can help you to become super strong warrior but only if you trust me are you intersted to become super strong warrior or maybe become a King yes, no?", "necro");
+    
+    
+    waitAction = true;
+
+  
+  const chatInput = document.querySelector("#champ_writer");
+  chatInput.focus();
+  // wait for yes or no 
+  
+  
+}
+
+chatWithNecro.addEventListener("click", startChatWithNecro);
+
+
+
 function enableChatChamp(){
+  chatWithNecro.style.display = "";
   const chatContainer = document.querySelector("#chat_container");
-  chatContainer.style.background = "#66c28fc7";
+  chatContainer.style.background = "#315642c7";
+  canChampChatWithNecro = true;
+  
+  return true;
 }
 
 
 function disableChatChamp(){
+  chatWithNecro.style.display = "none";
   const chatContainer = document.querySelector("#chat_container");
   chatContainer.style.background = "#d3d3d345";
+  necroCont9.style.background = "";
+  stopEvents = false;
+  canChampChatWithNecro = false;
+  return true;
 }
 
+
+
+function addChampMessage(message, type){
+   const newMsg = document.createElement("p");
+   const allMessages = addNewMessageCont.querySelectorAll("p");
+   
+   let checkFitMsg = allMessages.length % 4 == 0;
+   if (checkFitMsg){
+     allMessages[allMessages.length-1].style.paddingBottom = "20px";
+   }
+   newMsg.innerText = message;
+   if (type == "champ"){
+     newMsg.classList.add("champ_chat");
+   }
+   
+   if (type == "necro"){
+     newMsg.classList.add("necro_chat");
+   }
+   addNewMessageCont.appendChild(newMsg);
+   newMsg.scrollIntoView({behavior: "smooth"});
+}
 
 /* */
 
@@ -163,62 +348,6 @@ return mon;
 
 }
 
-const necroCont9 = document.querySelector("#necro_cont");
-
-
-/* Base Home Point script objects */
- const necroHeight = $("#necro_char").height();
- const necroWidth = $("#necro_char").height();
-const necro = {
-  background: "https://images.pexels.com/photos/998641/pexels-photo-998641.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-  characterId: "necro_char",
-  getPositions: function() {
-    const necroCont = document.querySelector("#necro_cont");
-    if (necroCont){
-      const necroContPositions = getObjPos(necroCont);
-      return necroContPositions;
-    } else {
-      return null;
-    } 
-    
-  },
-  
-  isTuched: function(necroObj, champObj){
-    const necroPositions = necroObj;
-    const champPositions = champObj;
-    if (!necroObj || !champObj){return false;}
-   // alert((necroPositions.right - necroWidth) + ":chmp" + champObj.right);
-    let isChampInArea = false;
-    if (champObj.right >= (necroPositions.right - (necroWidth - 100)) && champObj.right < necroPositions.right ) {
-      //alert("champ in area of necro right");
-      isChampInArea = true;
-    
-    } else if (necroPositions.left == champObj.right) {
-       //alert("champ in area of necro left");
-       isChampInArea = true;
-    
-    } else if (necroPositions.top == champObj.top) {
-      // alert("champ in area of necro top");
-       isChampInArea = true;
-    } else if (necroPositions.bottom == champObj.bottom) {
-      // alert("champ in area of necro bottom");
-       isChampInArea = true;
-    
-    } else {
-      isChampInArea = false;
-    }
-    return isChampInArea;
-    
-  },
-  chat: (inArea)=> {
-    if (inArea) {
-       
-       return true;
-    } else {
-      return false;
-    }
-  }
-}
 
 
 /* Base Home end */
@@ -230,7 +359,9 @@ const necro = {
 async function jumb(){
 
 
-
+  if (stopEvents == true){
+    return false;
+  }
  if (champTop > 80 && timeSleep == false) {
   selectPosition("jumpD");
   await sleep(450);
@@ -267,6 +398,9 @@ async function jumb(){
       
 
 async function moveChamp (direction, champ) {
+  if (stopEvents == true){
+    return false;
+  }
 
   if (direction == "right" && timeSleep == false){
   
@@ -349,27 +483,53 @@ async function moveChamp (direction, champ) {
 
 // moving 
 //alert(necro.background);
-
+const sendMessageBtn = document.querySelector("#sendmessge");
 
 function checkChampVsObjects(object){
       if (object == "necro"){
         //const ableToChatWithNecro = necro.chat(isInNecroArea);
         
-        let activeBg = "url('" +necro.background  + "')";
+        
         if (necro.isTuched(getObjPos(necroCont9), getObjPos(champion))){
           enableChatChamp();
           //necroCont9.style.backgroundImage = necro.background;
-          necroCont9.style.background = activeBg;
+          
+
           return true;
         } else {
           disableChatChamp();
-          necroCont9.style.background = "";
+          
+
           return false;
         }
         
         
       }
 }
+
+const writer_input = document.querySelector("#champ_writer");
+const champMessages = [];
+function sendMessage(event) {
+   //disableChatChamp();
+
+   if (writer_input.value != ""){
+    const champMessageV = writer_input.value;
+    champMessages.push(writer_input.value);
+    writer_input.value = "";
+    addChampMessage(champMessageV, "champ");
+   if (waitAction){
+     applyInpuAction(champMessageV);   
+   }    
+    return true;
+   } else {
+     return false;
+   }
+   
+}
+
+sendMessageBtn.addEventListener("click", sendMessage);
+
+
 addEvent(document, "keydown", function (e) {
     checkChampVsObjects("necro");
     e = e || window.event;
@@ -444,7 +604,7 @@ $('#chatButton').click(function(){
   $('#chat_container').toggle();   
 })
 
-
+  $('[data-toggle="popover"]').popover();   
 
 const necroCont = document.querySelector("#necro_cont");
 //alert(necro.isTuched());
@@ -485,7 +645,7 @@ const necroCont = document.querySelector("#necro_cont");
 
 
 <img id="necro_char" style="position: fixed;top: 40px;right: 25px;" src="https://thumbs.gfycat.com/ArcticGratefulCrustacean-size_restricted.gif" width="250" height="200">
-  
+<button class="btn-primary" style="position: absolute;top: 200;px;z-index: 200;right: -10px;position: fixed;top: 250px;right: 100px;" id="chat_with_necrobtn">Say Hi To Mazrd</button>
 </div>
 
 
@@ -503,7 +663,7 @@ const necroCont = document.querySelector("#necro_cont");
 
 <div style="width:300px;margin-left:auto;margin-right:auto;text-align:center;background:url('https://www.freeiconspng.com/uploads/sword-png-3.png');background-size:cover;">
 <div class="container">
-  <a href="#" style="z-index:12;cursor:pointer;position:relative;top:0px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="right" data-trigger="focus" title="Who Is the Blacksmith!" data-content="Oh, it's long Story ..Black Smith is old warrior he created great weabons for great warriors like you, try to talk to him to buy and sell weaponse and items">The Blacksmith</a>
+  <a href="#" style="z-index:12;cursor:pointer;position:relative;top:0px;cursor:pointer;text-align:center;font-family:Arial black;text-decration:none;font-size:20px;" data-toggle="popover" data-placement="left" data-trigger="focus" title="Who Is the Blacksmith!" data-content="Oh, it's long Story ..Black Smith is old warrior he created great weabons for great warriors like you, try to talk to him to buy and sell weaponse and items">The Blacksmith</a>
 </div>
 
 <img width="250" height="250" src="https://forum.reallusion.com/uploads/images/746eaaf4-09cc-4878-a367-1c0b.gif">
@@ -536,11 +696,19 @@ const necroCont = document.querySelector("#necro_cont");
 <!-- champ start -->
 
   
-<!-- champ end -->
+<!-- champ end --> 
 
-<div id="chat_container" class="chat" style="height:150px;width:150px;position:fixed;bottom:0px;left:0;z-index:10;background:lightgray;width:100%;background:#d3d3d345;padding:15px;font-weight:bold;font-family:sans-serif;">Hello world </div>
-
+<div id="chat_container" class="chat" style="height:200px;width:150px;position:fixed;bottom:0px;left:0;z-index:10;background:lightgray;width:100%;background:#d3d3d345;padding:15px;font-weight:bold;font-family:sans-serif;"><p class="champ_chat"></p> </div>
+<div class="container-fluid">
+<div class="row">
+ <input class="col-8 form-control" style="position:fixed;bottom:25px;left:0;z-index:10;background:lightgray;width:100%;background:#d3d3d345;padding:15px;font-weight:bold;font-family:sans-serif;display:inherit;" id="champ_writer" type="text">
+ <button class="col-4 btn btn-primary text-dark" id="sendmessge"  style="position:fixed;bottom:10px;right:0;z-index:10;background:lightgray;width:100%;background:#d3d3d345;padding:15px;font-weight:bold;font-family:sans-serif;display:inherit;">Send Message</button>
+ </div>
 </div>
+</div>
+
+
+
 
 <button id="chatButton" data-chat="chat_container" style="display:block;position:fixed;bottom:-5px;left:0;z-index:10;background:lightgray;width:100%;font-size:14px;">Hide Chat</button>
 
